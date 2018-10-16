@@ -22,7 +22,8 @@ class JsonLogFilter implements LogFilterPlugin{
 
     @PluginProperty(
             title = 'jq Filter',
-            description = '''Add a jq Filter''',
+            description = '''Add a jq Filter.
+See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-current-limitations) for further information''',
             defaultValue=".",
             required=true
 
