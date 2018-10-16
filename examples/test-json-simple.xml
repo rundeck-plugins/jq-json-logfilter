@@ -1,0 +1,47 @@
+<joblist>
+  <job>
+    <defaultTab>summary</defaultTab>
+    <description></description>
+    <executionEnabled>true</executionEnabled>
+    <group>JSON</group>
+    <loglevel>INFO</loglevel>
+    <name>test-json-simple</name>
+    <nodeFilterEditable>false</nodeFilterEditable>
+    <scheduleEnabled>true</scheduleEnabled>
+    <sequence keepgoing='false' strategy='node-first'>
+      <command>
+        <plugins>
+          <LogFilter type='json-mapper'>
+            <config>
+              <filter>.</filter>
+              <logData>true</logData>
+              <prefix>data</prefix>
+            </config>
+          </LogFilter>
+        </plugins>
+        <script><![CDATA[cat <<-END
+{
+  "result": {
+    "parent": {
+      "link": "https://rundeck-test/api",
+      "value": "123345"
+    },
+    "user": "rundeck",
+    "created_by": {
+      "link": "https://rundeck-test/user/1",
+      "value": "123345"
+    },
+    "created_date": "2018-10-03 19:17:54",
+    "status": "1",
+    "closed_date": "2018-10-03 19:46:49"
+  }
+}
+END]]></script>
+        <scriptargs />
+      </command>
+      <command>
+        <exec>echo ${data.result.created_date}</exec>
+      </command>
+    </sequence>
+  </job>
+</joblist>
