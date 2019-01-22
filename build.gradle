@@ -79,11 +79,18 @@ jar {
     from "$buildDir/output"
     manifest {
         def libList = configurations.pluginLibs.collect{'lib/'+it.name}.join(' ')
+        attributes 'Rundeck-Plugin-Name' : 'jq Json Log Filter'
+        attributes 'Rundeck-Plugin-Description' : 'This plugin maps a JSON String output from a step to key/value context variables.'
+        attributes 'Rundeck-Plugin-Rundeck-Compatibility-Version': '3.0.6+'
+        attributes 'Rundeck-Plugin-Tags': 'java,json,log filter'
+        attributes 'Rundeck-Plugin-License': 'Apache 2.0'
+        attributes 'Rundeck-Plugin-Source-Link': 'https://github.com/rundeck-plugins/jq-json-logfilter'
+        attributes 'Rundeck-Plugin-Target-Host-Compatibility': 'all'
         attributes 'Rundeck-Plugin-Classnames': pluginClassNames
         attributes 'Rundeck-Plugin-File-Version': version
         attributes 'Rundeck-Plugin-Version': rundeckPluginVersion, 'Rundeck-Plugin-Archive': 'true'
         attributes 'Rundeck-Plugin-Libs': "${libList}"
-        attributes 'Main-Class': "io.github.valfadeev.rundeck.plugin.vault.VaultStoragePlugin"
+        attributes 'Main-Class': "com.rundeck.plugins.logging.JsonLogFilter"
         attributes 'Class-Path': "${libList} lib/rundeck-core-${rundeckVersion}.jar"
     }
 }
