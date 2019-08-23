@@ -60,8 +60,9 @@ dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.3.11'
 
     compile group: 'org.rundeck', name: 'rundeck-core', version: rundeckVersion
-    pluginLibs group: 'net.thisptr', name: 'jackson-jq', version: '0.0.9'
-
+    pluginLibs (group: 'net.thisptr', name: 'jackson-jq', version: '0.0.10') {
+       exclude group: "com.fasterxml.jackson.core"
+    }
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
