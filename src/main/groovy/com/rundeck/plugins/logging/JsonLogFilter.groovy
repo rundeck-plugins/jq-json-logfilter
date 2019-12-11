@@ -1,5 +1,6 @@
 package com.rundeck.plugins.logging
 
+import com.dtolabs.rundeck.core.dispatcher.DataContextUtils
 import com.dtolabs.rundeck.core.execution.workflow.OutputContext
 import com.dtolabs.rundeck.core.logging.LogEventControl
 import com.dtolabs.rundeck.core.logging.LogLevel
@@ -48,6 +49,7 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
     OutputContext outputContext
     Map<String, String> allData
     private ObjectMapper mapper
+    private String replacedFilter
 
 
     @Override
@@ -56,7 +58,7 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
         buffer = new StringBuffer()
         mapper = new ObjectMapper()
         allData = [:]
-
+        replacedFilter = DataContextUtils.replaceDataReferences(filter,context.getDataContext())
     }
 
     @Override
@@ -93,7 +95,7 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
 
             Scope rootScope = Scope.newEmptyScope()
             rootScope.loadFunctions(Scope.class.getClassLoader())
-            JsonQuery q = JsonQuery.compile(filter)
+            JsonQuery q = JsonQuery.compile(replacedFilter)
             JsonNode inData = mapper.readTree(buffer.toString());
 
             List<JsonNode> out = q.apply(rootScope, inData)
@@ -108,7 +110,9 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
                 }else{
                     if(it.getNodeType()==JsonNodeType.ARRAY){
                         this.iterateArray(it.elements())
-                    }else{
+                    } else if(it.getNodeType()==JsonNodeType.STRING) {
+                        allData.put(prefix, it.asText())
+                    } else {
                         allData.put(prefix, it.toString())
                     }
                 }
@@ -126,7 +130,7 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
         Integer i=0
         list.each{it->
             if(it.getNodeType() == JsonNodeType.STRING){
-                allData.put(prefix +"."+ i.toString(),it.textValue())
+                allData.put(prefix +"."+ i.toString(),it.asText())
             }else{
                 allData.put(prefix +"."+ i.toString(),it.toString())
             }
@@ -154,7 +158,7 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
         }else{
             def extractValue
             if(value.getNodeType() == JsonNodeType.STRING){
-                extractValue=value.textValue()
+                extractValue=value.asText()
             }else{
                 extractValue = value.toString()
             }
