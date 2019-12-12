@@ -59,6 +59,7 @@ class JsonLogFilterSpec extends Specification {
                 'test'  : 'value',
                 'something2' : 'value1'
         ]
+        false | ".id"           | ['{"id":"abc12345"}']                         | [result: 'abc12345']
     }
 
     def "array test"() {
