@@ -1,17 +1,24 @@
+import org.gradle.api.JavaVersion
+
 plugins {
     id 'groovy'
     id 'java'
-    id 'pl.allegro.tech.build.axion-release' version '1.7.1'
+    id 'pl.allegro.tech.build.axion-release' version '1.13.4'
+    id 'maven-publish'
 }
 
 group 'com.rundeck.plugin'
 
-ext.rundeckVersion='3.0.6-20180917'
+ext.rundeckVersion='5.0.0-20231216'
 defaultTasks 'clean','build'
 apply plugin: 'java'
 apply plugin: 'idea'
 
-sourceCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
 ext.rundeckPluginVersion= '1.2'
 
 scmVersion {
@@ -39,9 +46,8 @@ project.version = scmVersion.version
 ext.pluginClassNames='com.rundeck.plugins.logging.JsonLogFilter'
 
 
-sourceCompatibility = 1.8
-
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -50,22 +56,23 @@ configurations{
     pluginLibs
 
     //declare compile to extend from pluginLibs so it inherits the dependencies
-    compile{
+    implementation{
         extendsFrom pluginLibs
     }
 }
 
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.3.11'
+    implementation 'org.codehaus.groovy:groovy-all:3.0.19'
 
-    compile group: 'org.rundeck', name: 'rundeck-core', version: rundeckVersion
-    pluginLibs (group: 'net.thisptr', name: 'jackson-jq', version: '0.0.10') {
+    implementation group: 'org.rundeck', name: 'rundeck-core', version: rundeckVersion
+
+    pluginLibs (group: 'net.thisptr', name: 'jackson-jq', version: '1.0.0-preview.20230409') {
        exclude group: "com.fasterxml.jackson.core"
     }
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    testImplementation "org.spockframework:spock-core:2.0-groovy-3.0"
 }
 
 
@@ -75,6 +82,9 @@ task copyToLib(type: Copy) {
     from configurations.pluginLibs
 }
 
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
 
 jar {
     from "$buildDir/output"
@@ -97,3 +107,12 @@ jar {
 }
 //set jar task to depend on copyToLib
 jar.dependsOn(copyToLib)
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'jq-json-logfilter'
+            from components.java
+        }
+    }
+}
