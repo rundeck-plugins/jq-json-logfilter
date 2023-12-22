@@ -14,8 +14,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.JsonNodeType
 import net.thisptr.jackson.jq.JsonQuery
 import net.thisptr.jackson.jq.Scope
+import net.thisptr.jackson.jq.BuiltinFunctionLoader
+import net.thisptr.jackson.jq.Versions
 
-@Plugin(name = JsonLogFilter.PROVIDER_NAME, service = 'LogFilter')
+@Plugin(name = PROVIDER_NAME, service = 'LogFilter')
 @PluginDescription(title = 'JSON jq key/value mapper',
                    description = 'Map a json logoutput on key/value to context data using jq filters')
 class JsonLogFilter implements LogFilterPlugin{
@@ -92,13 +94,15 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
     void processJson(final PluginLoggingContext context){
 
         try{
+            Scope rootScope = Scope.newEmptyScope();
+            BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope);
 
-            Scope rootScope = Scope.newEmptyScope()
-            rootScope.loadFunctions(Scope.class.getClassLoader())
-            JsonQuery q = JsonQuery.compile(replacedFilter)
             JsonNode inData = mapper.readTree(buffer.toString());
 
-            List<JsonNode> out = q.apply(rootScope, inData)
+            JsonQuery q = JsonQuery.compile(replacedFilter, Versions.JQ_1_6);
+
+            final List<JsonNode> out = new ArrayList<>();
+            q.apply(rootScope, inData, out::add);
 
             out.each {it->
                 //process object
