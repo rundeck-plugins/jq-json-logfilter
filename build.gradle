@@ -1,4 +1,4 @@
-import org.gradle.api.tasks.testing.Test
+import org.gradle.api.JavaVersion
 
 plugins {
     id 'groovy'
@@ -14,7 +14,11 @@ defaultTasks 'clean','build'
 apply plugin: 'java'
 apply plugin: 'idea'
 
-sourceCompatibility = 1.11
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
 ext.rundeckPluginVersion= '1.2'
 
 scmVersion {
