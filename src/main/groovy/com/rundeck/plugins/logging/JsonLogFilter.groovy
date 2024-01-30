@@ -47,6 +47,13 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
     )
     Boolean logData
 
+    @PluginProperty(
+            title = 'Extra quotes',
+            description = '''If true, the result will be parse to string, that will add extra quotes to the result (compatible with rundeck 4.x)''',
+            defaultValue = 'false'
+    )
+    Boolean extraQuotes=false
+
     private StringBuffer buffer;
     OutputContext outputContext
     Map<String, String> allData
@@ -94,15 +101,15 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
     void processJson(final PluginLoggingContext context){
 
         try{
-            Scope rootScope = Scope.newEmptyScope()
-            BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope)
+            Scope rootScope = Scope.newEmptyScope();
+            BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope);
 
-            JsonNode inData = mapper.readTree(buffer.toString())
+            JsonNode inData = mapper.readTree(buffer.toString());
 
-            JsonQuery q = JsonQuery.compile(replacedFilter, Versions.JQ_1_6)
+            JsonQuery q = JsonQuery.compile(replacedFilter, Versions.JQ_1_6);
 
-            final List<JsonNode> out = new ArrayList<>()
-            q.apply(rootScope, inData, out::add)
+            final List<JsonNode> out = new ArrayList<>();
+            q.apply(rootScope, inData, out::add);
 
             out.each {it->
                 //process object
@@ -114,6 +121,12 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
                 }else{
                     if(it.getNodeType()==JsonNodeType.ARRAY){
                         this.iterateArray(it.elements())
+                    } else if(it.getNodeType()==JsonNodeType.STRING) {
+                        def value = it.asText()
+                        if(extraQuotes){
+                            value = it.toString()
+                        }
+                        allData.put(prefix, value)
                     } else {
                         allData.put(prefix, it.toString())
                     }
@@ -131,7 +144,16 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
 
         Integer i=0
         list.each{it->
-            allData.put(prefix +"."+ i.toString(),it.toString())
+            if(it.getNodeType() == JsonNodeType.STRING){
+                def value = it.textValue()
+                if(extraQuotes){
+                    value = it.toString()
+                }
+                allData.put(prefix +"."+ i.toString(),value)
+            }else{
+                allData.put(prefix +"."+ i.toString(),it.toString())
+            }
+
             i++
         }
     }
@@ -153,7 +175,19 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
                 iterateJsonObject(subKey, newPath)
             }
         }else{
-            allData.put(newPath,value.toString())
+            def extractValue
+            if(value.getNodeType() == JsonNodeType.STRING){
+                if(extraQuotes){
+                    extractValue=value.toString()
+                }else{
+                    extractValue=value.asText()
+                }
+
+            }else{
+                extractValue = value.toString()
+            }
+
+            allData.put(newPath,extractValue)
         }
     }
 
