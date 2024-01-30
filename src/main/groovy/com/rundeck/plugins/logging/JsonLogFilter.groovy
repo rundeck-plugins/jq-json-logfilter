@@ -94,15 +94,15 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
     void processJson(final PluginLoggingContext context){
 
         try{
-            Scope rootScope = Scope.newEmptyScope();
-            BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope);
+            Scope rootScope = Scope.newEmptyScope()
+            BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope)
 
-            JsonNode inData = mapper.readTree(buffer.toString());
+            JsonNode inData = mapper.readTree(buffer.toString())
 
-            JsonQuery q = JsonQuery.compile(replacedFilter, Versions.JQ_1_6);
+            JsonQuery q = JsonQuery.compile(replacedFilter, Versions.JQ_1_6)
 
-            final List<JsonNode> out = new ArrayList<>();
-            q.apply(rootScope, inData, out::add);
+            final List<JsonNode> out = new ArrayList<>()
+            q.apply(rootScope, inData, out::add)
 
             out.each {it->
                 //process object
@@ -114,8 +114,6 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
                 }else{
                     if(it.getNodeType()==JsonNodeType.ARRAY){
                         this.iterateArray(it.elements())
-                    } else if(it.getNodeType()==JsonNodeType.STRING) {
-                        allData.put(prefix, it.asText())
                     } else {
                         allData.put(prefix, it.toString())
                     }
@@ -133,12 +131,7 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
 
         Integer i=0
         list.each{it->
-            if(it.getNodeType() == JsonNodeType.STRING){
-                allData.put(prefix +"."+ i.toString(),it.asText())
-            }else{
-                allData.put(prefix +"."+ i.toString(),it.toString())
-            }
-
+            allData.put(prefix +"."+ i.toString(),it.toString())
             i++
         }
     }
@@ -160,14 +153,7 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
                 iterateJsonObject(subKey, newPath)
             }
         }else{
-            def extractValue
-            if(value.getNodeType() == JsonNodeType.STRING){
-                extractValue=value.asText()
-            }else{
-                extractValue = value.toString()
-            }
-
-            allData.put(newPath,extractValue)
+            allData.put(newPath,value.toString())
         }
     }
 
