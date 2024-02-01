@@ -47,6 +47,13 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
     )
     Boolean logData
 
+    @PluginProperty(
+            title = 'Extra quotes',
+            description = '''If true, the result will be parse to string, that will add extra quotes to the result (compatible with rundeck 4.x)''',
+            defaultValue = 'false'
+    )
+    Boolean extraQuotes=false
+
     private StringBuffer buffer;
     OutputContext outputContext
     Map<String, String> allData
@@ -115,7 +122,11 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
                     if(it.getNodeType()==JsonNodeType.ARRAY){
                         this.iterateArray(it.elements())
                     } else if(it.getNodeType()==JsonNodeType.STRING) {
-                        allData.put(prefix, it.asText())
+                        def value = it.asText()
+                        if(extraQuotes){
+                            value = it.toString()
+                        }
+                        allData.put(prefix, value)
                     } else {
                         allData.put(prefix, it.toString())
                     }
@@ -134,7 +145,11 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
         Integer i=0
         list.each{it->
             if(it.getNodeType() == JsonNodeType.STRING){
-                allData.put(prefix +"."+ i.toString(),it.asText())
+                def value = it.textValue()
+                if(extraQuotes){
+                    value = it.toString()
+                }
+                allData.put(prefix +"."+ i.toString(),value)
             }else{
                 allData.put(prefix +"."+ i.toString(),it.toString())
             }
@@ -162,7 +177,12 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
         }else{
             def extractValue
             if(value.getNodeType() == JsonNodeType.STRING){
-                extractValue=value.asText()
+                if(extraQuotes){
+                    extractValue=value.toString()
+                }else{
+                    extractValue=value.asText()
+                }
+
             }else{
                 extractValue = value.toString()
             }
