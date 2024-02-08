@@ -15,6 +15,7 @@ class JsonLogFilterSpec extends Specification {
         plugin.filter = filter
         plugin.prefix = "result"
         plugin.logData = dolog
+        plugin.extraQuotes = false
         def sharedoutput = new DataOutput(ContextView.global())
         def context = Mock(PluginLoggingContext) {
             getOutputContext() >> sharedoutput
@@ -62,6 +63,55 @@ class JsonLogFilterSpec extends Specification {
         false | ".id"           | ['{"id":"abc12345"}']                         | [result: 'abc12345']
     }
 
+    def "simple test legacy quoting"() {
+        given:
+        def plugin = new JsonLogFilter()
+        plugin.filter = filter
+        plugin.prefix = "result"
+        plugin.logData = dolog
+        plugin.extraQuotes = quoteVal
+        def sharedoutput = new DataOutput(ContextView.global())
+        def context = Mock(PluginLoggingContext) {
+            getOutputContext() >> sharedoutput
+        }
+        def events = []
+        lines.each { line ->
+            events << Mock(LogEventControl) {
+                getMessage() >> line
+                getEventType() >> 'log'
+                getLoglevel() >> LogLevel.NORMAL
+            }
+        }
+        when:
+        plugin.init(context)
+        events.each {
+            plugin.handleEvent(context, it)
+        }
+        plugin.complete(context)
+        then:
+
+        sharedoutput.getSharedContext().getData(ContextView.global())?.getData() == (expect ? ['data': expect] : null)
+        if (expect) {
+            if (dolog) {
+                1 * context.log(2, _, _)
+            } else {
+                0 * context.log(*_)
+            }
+        }
+
+
+        where:
+
+        quoteVal | dolog | filter | lines                | expect
+        false    | true  | "."    | ['{"test":"value"}'] | [test: 'value']
+        null     | true  | "."    | ['{"test":"value"}'] | [test: '"value"']
+        true     | true  | "."    | ['{"test":"value"}'] | [test: '"value"']
+        true     | true  | "."    | ['["value"]']        | ['result.0': '"value"']
+        null     | true  | "."    | ['["value"]']        | ['result.0': '"value"']
+        false    | true  | "."    | ['["value"]']        | ['result.0': 'value']
+
+    }
+
     def "array test"() {
         given:
         def filter = ".[]"
@@ -70,6 +120,7 @@ class JsonLogFilterSpec extends Specification {
         plugin.filter = filter
         plugin.prefix = "result"
         plugin.logData = dolog
+        plugin.extraQuotes = false
         def sharedoutput = new DataOutput(ContextView.global())
         def context = Mock(PluginLoggingContext) {
             getOutputContext() >> sharedoutput
