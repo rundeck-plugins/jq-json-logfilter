@@ -9,7 +9,7 @@ plugins {
 
 group 'com.rundeck.plugin'
 
-ext.rundeckVersion='5.0.0-20231216'
+ext.rundeckVersion='5.14.0-rc1-20250722'
 defaultTasks 'clean','build'
 apply plugin: 'java'
 apply plugin: 'idea'
