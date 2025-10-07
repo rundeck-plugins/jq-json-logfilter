@@ -66,6 +66,9 @@ dependencies {
     implementation 'org.codehaus.groovy:groovy-all:3.0.19'
 
     implementation group: 'org.rundeck', name: 'rundeck-core', version: rundeckVersion
+    
+    // Add secure commons-lang3 to provide alternative to vulnerable commons-lang 2.6
+    implementation 'org.apache.commons:commons-lang3:3.18.0'
 
     pluginLibs (group: 'net.thisptr', name: 'jackson-jq', version: '1.0.0-preview.20230409') {
        exclude group: "com.fasterxml.jackson.core"
@@ -73,6 +76,15 @@ dependencies {
 
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'
     testImplementation "org.spockframework:spock-core:2.0-groovy-3.0"
+}
+
+configurations.all {
+    resolutionStrategy {
+        // Replace vulnerable commons-lang with secure commons-lang3
+        dependencySubstitution {
+            substitute module('commons-lang:commons-lang') using module('org.apache.commons:commons-lang3:3.18.0')
+        }
+    }
 }
 
 
