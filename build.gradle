@@ -7,16 +7,16 @@ plugins {
     id 'maven-publish'
 }
 
-group 'com.rundeck.plugin'
+group 'com.github.rundeck-plugins'
 
-ext.rundeckVersion='5.14.0-rc1-20250722'
+ext.rundeckVersion='6.0.0-SNAPSHOT'
 defaultTasks 'clean','build'
 apply plugin: 'java'
 apply plugin: 'idea'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 ext.rundeckPluginVersion= '1.2'
@@ -38,6 +38,8 @@ scmVersion {
     }
 }
 project.version = scmVersion.version
+// Override version for Grails 7 upgrade
+project.version = '1.0.9-grails7-upgrade-test'
 
 /**
  * Set this to a comma-separated list of full classnames of your implemented Rundeck
@@ -63,7 +65,7 @@ configurations{
 
 
 dependencies {
-    implementation 'org.codehaus.groovy:groovy-all:3.0.19'
+    implementation 'org.apache.groovy:groovy-all:4.0.29'
 
     implementation group: 'org.rundeck', name: 'rundeck-core', version: rundeckVersion
     
@@ -75,7 +77,9 @@ dependencies {
     }
 
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'
-    testImplementation "org.spockframework:spock-core:2.0-groovy-3.0"
+    testImplementation "org.spockframework:spock-core:2.4-groovy-4.0"
+    testImplementation "cglib:cglib-nodep:3.3.0"
+    testImplementation 'org.objenesis:objenesis:1.4'
 }
 
 configurations.all {
@@ -96,6 +100,13 @@ task copyToLib(type: Copy) {
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
+    
+    // Java 17+ module access
+    jvmArgs = [
+        '--add-opens=java.base/java.lang=ALL-UNNAMED',
+        '--add-opens=java.base/java.util=ALL-UNNAMED',
+        '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED'
+    ]
 }
 
 jar {
