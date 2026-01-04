@@ -21,23 +21,6 @@ java {
 
 ext.rundeckPluginVersion= '1.2'
 
-scmVersion {
-    ignoreUncommittedChanges = false
-    tag {
-        prefix = ''
-        versionSeparator = ''
-        def origDeserialize=deserialize
-        //apend .0 to satisfy semver if the tag version is only X.Y
-        deserialize = { config, position, tagName ->
-            def orig = origDeserialize(config, position, tagName)
-            if (orig.split('\\.').length < 3) {
-                orig += ".0"
-            }
-            orig
-        }
-    }
-}
-project.version = scmVersion.version
 // Override version for Grails 7 upgrade
 project.version = '1.0.9-grails7-upgrade-test'
 
