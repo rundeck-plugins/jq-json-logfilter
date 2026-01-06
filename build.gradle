@@ -33,6 +33,15 @@ ext.pluginClassNames='com.rundeck.plugins.logging.JsonLogFilter'
 
 repositories {
     mavenLocal()
+    maven {
+        name = 'Central Portal Snapshots'
+        url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        
+        // Only search this repository for org.rundeck snapshots
+        content {
+            includeGroup('org.rundeck')
+        }
+    }
     mavenCentral()
 }
 
