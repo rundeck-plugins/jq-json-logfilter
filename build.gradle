@@ -3,11 +3,19 @@ import org.gradle.api.JavaVersion
 plugins {
     id 'groovy'
     id 'java'
-    id 'pl.allegro.tech.build.axion-release' version '1.13.4'
+    id 'pl.allegro.tech.build.axion-release' version '1.17.2'
     id 'maven-publish'
 }
 
-group 'com.github.rundeck-plugins'
+group 'com.rundeck.plugins'
+
+scmVersion {
+    ignoreUncommittedChanges = false
+    tag {
+        prefix = ''           // NO "v" prefix - see PLUGIN_TAGGING_ARCHITECTURE.md
+        versionSeparator = ''
+    }
+}
 
 ext.rundeckVersion='6.0.0-SNAPSHOT'
 defaultTasks 'clean','build'
@@ -21,8 +29,7 @@ java {
 
 ext.rundeckPluginVersion= '1.2'
 
-// Override version for Grails 7 upgrade
-project.version = '1.0.13-grails7-upgrade-test'
+version = scmVersion.version  // Dynamic version from git tag
 
 /**
  * Set this to a comma-separated list of full classnames of your implemented Rundeck
@@ -133,8 +140,24 @@ jar.dependsOn(copyToLib)
 publishing {
     publications {
         maven(MavenPublication) {
+            groupId = 'com.rundeck.plugins'
             artifactId = 'jq-json-logfilter'
+            version = project.version
             from components.java
+        }
+    }
+    
+    repositories {
+        maven {
+            name = "PackageCloudTest"
+            url = uri("https://packagecloud.io/pagerduty/rundeckpro-test/maven2")
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+            credentials(HttpHeaderCredentials) {
+                name = "Authorization"
+                value = "Bearer " + (System.getenv("PKGCLD_WRITE_TOKEN") ?: project.findProperty("pkgcldWriteToken"))
+            }
         }
     }
 }
