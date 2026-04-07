@@ -23,7 +23,7 @@ scmVersion {
     }
 }
 
-ext.rundeckVersion='6.0.0-SNAPSHOT'
+ext.rundeckVersion='6.0.0-alpha1-20260407'
 defaultTasks 'clean','build'
 apply plugin: 'java'
 apply plugin: 'idea'
