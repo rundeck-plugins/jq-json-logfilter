@@ -104,10 +104,10 @@ class JsonLogFilterSpec extends Specification {
 
         quoteVal | dolog | filter | lines                | expect
         false    | true  | "."    | ['{"test":"value"}'] | [test: 'value']
-        null     | true  | "."    | ['{"test":"value"}'] | [test: '"value"']
+        null     | true  | "."    | ['{"test":"value"}'] | [test: 'value']
         true     | true  | "."    | ['{"test":"value"}'] | [test: '"value"']
         true     | true  | "."    | ['["value"]']        | ['result.0': '"value"']
-        null     | true  | "."    | ['["value"]']        | ['result.0': '"value"']
+        null     | true  | "."    | ['["value"]']        | ['result.0': 'value']
         false    | true  | "."    | ['["value"]']        | ['result.0': 'value']
 
     }
