@@ -47,10 +47,10 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
     )
     Boolean logData
 
-    //Note: we don't set a defaultValue, so that we can detect a null value if the user has not set it
     @PluginProperty(
             title = 'Extra quotes (Rundeck 4.x Compatibility)',
-            description = '''If true, the result will be parsed to a string with extra quotes to match Rundeck 4.x behavior.'''
+            description = '''If true, the result will be parsed to a string with extra quotes to match Rundeck 4.x behavior.''',
+            defaultValue = 'false'
     )
     Boolean extraQuotes
 
@@ -82,14 +82,7 @@ See [here](https://github.com/eiiches/jackson-jq#implementation-status-and-curre
     void complete(final PluginLoggingContext context) {
 
         if(buffer.size()>0) {
-            if (extraQuotes == null) {
-                //fall back to previous behavior
-                extraQuotes = true
-                context.log(
-                        1,
-                        'JSON jq key/value mapper: defaulting to rundeck 4.x quoting behavior'
-                )
-            }else if(extraQuotes){
+            if(extraQuotes){
                 context.log(
                         1,
                         'JSON jq key/value mapper: Using rundeck 4.x quoting behavior'
