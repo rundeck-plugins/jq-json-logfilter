@@ -71,7 +71,7 @@ configurations{
 
 
 dependencies {
-    implementation 'org.apache.groovy:groovy-all:4.0.32'
+    implementation 'org.apache.groovy:groovy-all:4.0.33'
 
     compileOnly group: 'org.rundeck', name: 'rundeck-core', version: rundeckVersion
     testImplementation group: 'org.rundeck', name: 'rundeck-core', version: rundeckVersion
